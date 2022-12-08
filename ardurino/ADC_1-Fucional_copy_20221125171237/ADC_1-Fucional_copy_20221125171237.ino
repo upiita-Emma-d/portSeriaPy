@@ -10,18 +10,26 @@ String teststr = "____";
 float ciclos = 15;
 float adc_1_0 = 0;
 float nueva;
+int n_rand;
 void setup(void) 
 {
   Serial.begin(9600);
   pinMode(ledPIN , OUTPUT);  //definir pin como salida
   delay(200);
-  if (!ads1.begin(0x48)) {
-    Serial.println("Failed to initialize ADS1.");
-    while (1);
-  }
+  // if (!ads1.begin(0x48)) {
+  //   Serial.println("Failed to initialize ADS1.");
+  //   while (1);
+  // }
   
-  ads1.begin();
+  // ads1.begin();
 }
+
+void send_messages(float b){
+    String string_c =  String(b) + ",";
+    Serial.println(string_c);
+}
+
+
 void write_and_read(int frecuencia) {
   //frecuencia = 3;
   if (frecuencia<=0){
@@ -31,12 +39,13 @@ void write_and_read(int frecuencia) {
   int steps = 5;
   ciclos = frecuencia;
   int retardo = 1000/(frecuencia*steps);
-  for (int repet = 0; repet <= 100; repet++){
+  String msj;
+  for (int repet = 0; repet <= 5; repet++){
     digitalWrite(ledPIN,HIGH);
     for (int i = 0; i < steps; i++){
       adc_1_0 = ads1.readADC_SingleEnded(0) ;
       nueva = (adc_1_0 * 5)/65636;
-      //Serial.println(nueva);
+      send_messages(nueva);
       delay(retardo);
     }
 
@@ -44,41 +53,48 @@ void write_and_read(int frecuencia) {
     for (int i = 0; i <=steps; i++){
       adc_1_0 = ads1.readADC_SingleEnded(0) ;
       nueva = (adc_1_0 *  5)/65636;
-      //Serial.println(nueva);
+      send_messages(nueva);
       delay(retardo);
     }
-    Serial.println(repet);
   }
+  Serial.println("FIN");
   
   // 2
 }
 
+
+void numeros_rand(){
+  for(int i=0; i<100; i++){
+    //Serial.println("Leyendo");
+    n_rand=random(1,3);
+    String string_c =  String(n_rand) + ",";
+    Serial.println(string_c);
+  }
+  Serial.println("FIN");
+}
+
 void loop(void) 
 {
-
-  if (Serial.available()){
-    Serial.println("Leyendo");
+  String string_c;
+  if (Serial.available()>0){
     teststr = Serial.readString();  //read until timeout
+    Serial.println("Leyendo");
     Serial.println(teststr);
     Serial.println("##########");
     teststr.trim();                        // remove any \r \n whitespace at the end of the String
-    for (int b ; b <10 ; b++){
-      Serial.println(b);  
-    }
-
+    Serial.flush();
   }
-   
-  Serial.println("HOLA ");
-  // if (teststr == "adc_0") {
-  // write_and_read(200);
-  // teststr = "";
-  // // LED APAGADO
-  
-  // }
+   ≈
+  if (teststr == "adc_0") {
+    //write_and_read(200);
+    numeros_rand();
+    teststr = "";
+    // LED APAGADO
+  }
 
-  // else {
-  //   //Serial.println(teststr);
-  //   teststr = "";
-  // }
+  else {
+    //Serial.println(teststr);
+    teststr = "";
+  }
 
 }
