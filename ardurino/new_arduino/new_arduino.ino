@@ -10,13 +10,13 @@ del proyecto.
 #include <Adafruit_ADS1X15.h>
 Adafruit_ADS1115 ads1;
 #include <Wire.h>
-int var = 100;
-int option = 0;
+int var = 50;
+
 const int ledPIN = 13;
 bool monutitoreo_cont;
 String entrada;
-float adc_1_0;
-int n_rand;
+
+
 bool prod = false;
 
 void setup() {
@@ -58,26 +58,16 @@ void serialEvent(){
   entrada.trim();
     // Control de flujo
   if(entrada.equals("sensores")){
-    Serial.print("{");
-    Serial.print("\"accion\":\"changeMenu\",");
-    Serial.print("\"menu\":\"monitorear\"");
-    Serial.println("}");
+
     enviarSensores();
   } 
 
   if(entrada.equals("sensor_1_inf")){
-    Serial.print("{");
-    Serial.print("\"accion\":\"changeMenu\",");
-    Serial.print("\"menu\":\"monitorear\"");
-    Serial.println("}");
     sensor_1();
   }
 
   if(entrada.equals("sensor_0")){
-    Serial.print("{");
-    Serial.print("\"accion\":\"changeMenu\",");
-    Serial.print("\"menu\":\"monitorear\"");
-    Serial.println("}");
+
     sensor_0();
   } 
 
@@ -91,7 +81,7 @@ void serialEvent(){
   Serial.print("\"menu\":\"home\"");
   Serial.println("}");
 
-  delay(50);                       // wait for a second
+  delay(10);                       // wait for a second
 
 }
 
@@ -144,26 +134,25 @@ void enviarSensores(){
   
 }
 
-int read_data(int sensor){
+long read_data(int sensor){
   if (prod==true){
     return ads1.readADC_SingleEnded(sensor);
   }
   else{
-    return random(15,100);
+    return random(62000,64000);
   }
 }
 
-String get_data_array(int &quantity){
-  String string_c;
+void get_data_array(int &quantity, String &string_c){
   string_c = "\"[";
-  String b;
+  long b;
   for (int i = 0; i<quantity;i++){
     b = read_data(0);
     string_c = string_c + String(b) + ",";
   }
   string_c = string_c + String(b);
   string_c = string_c + "]\"";
-  return string_c;
+  // return string_c;
 }
 
 
@@ -172,7 +161,7 @@ void get_json(int &quantity){
   Serial.print("{");
   Serial.print("\"accion\":\"monitoreo\",");
   Serial.print("\"sensor1\":");
-  string_c = get_data_array(quantity);
+  get_data_array(quantity, string_c);
   Serial.print(string_c);
   Serial.println("}");
 }
@@ -205,13 +194,14 @@ void sensor_1(){
 
 
 void sensor_0(){
-  digitalWrite(ledPIN,HIGH);
+  //digitalWrite(ledPIN,HIGH);
   get_json(var);
-
-  digitalWrite(ledPIN,LOW);
+  //digitalWrite(ledPIN,LOW);
   get_json(var);
-
+  get_json(var);
+  get_json(var);
   delay(50);
+  Serial.println("END");
 }
 
 

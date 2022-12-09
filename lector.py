@@ -2,6 +2,7 @@ import sys
 import glob
 import serial
 import time
+from random import random
 #with serial.Serial('/dev/cu.usbserial-1110', 9600, timeout=1) as ser:
      #ser.writelines(b'adc_0')
      #name = input('What is your name?\n') 
@@ -66,29 +67,69 @@ def select_port(result):
           print("Puerto no valido")
      return result[puerto]
 
+def super_lect(ser):
+    while True:
+        for c in ser.read():
+            seq.append(chr(c)) #convert from ANSII
+            joined_seq = ''.join(str(v) for v in seq) #Make a string from array
+
+            if chr(c) == '\n':
+                print("Line " + str(count) + ': ' + joined_seq)
+                seq = []
+                count += 1
+                break
+
+        ser.close()
+
 def open_port_serial(port_string):
-     serial_arduino = serial.Serial(port_string, 9600)
-     print("Phase 1")
-     #time.sleep(10)
-     cadena  = "hola bebe"
-     xd = cadena.encode('ascii')
-     serial_arduino.write(bytes(cadena, 'utf-8'))
-     time.sleep(0.05)
-     print("Phase 2")
-     data = serial_arduino.readline()
-     print(data)
-     print("Phase 3")
-     cadena  = "hola bebe"
-     xd = cadena.encode('ascii')
-     serial_arduino.write(bytes(cadena, 'utf-8'))
-     print("Phase 4")
-     data = serial_arduino.readline()
-     print(data)
-     
+    serial_arduino = serial.Serial(port_string, 9600)
+    serial_arduino.flushOutput()
+    serial_arduino.flushInput()
+    timeout=time.time()+3.0
+    data = b""
+    while serial_arduino.inWaiting() or time.time()-timeout<0.0:
+        if serial_arduino.inWaiting()>0:
+            data+=serial_arduino.read(serial_arduino.inWaiting())
+            timeout=time.time()+1.0
+    print(data)
+    
+    print("Phase 3")
+    cadena  = "adc_1"
+    xd = cadena.encode('ascii')
+    serial_arduino.write(bytes(cadena, 'utf-8'))
+    print("Phase 4")
+    data = serial_arduino.readline()
+    print(data)
+    data = serial_arduino.readline()
+    print(data)
+    data = serial_arduino.readline()
+    print(data)
+    los_datos = []
+    while 1:
+        data = serial_arduino.readline()
+        #print(data)
+        data_i = data.decode("utf-8")
+        try: 
+            los_datos.append(float(data_i.replace(",\r\n","")))
+        except:
+            pass
+            
+        if data ==  b'Fin\r\n':
+            print(los_datos)
+            break
+
+       
+
+def moke_data():
+    list_of_data = []
+    for i in range(100):
+        dato = random()
+        list_of_data.append(dato)
+    return list_of_data
 
 if __name__ == '__main__':
-    print("Hola")
     port = select_port(serial_ports())
     open_port_serial(port)
+    #print(moke_data())
     
     
